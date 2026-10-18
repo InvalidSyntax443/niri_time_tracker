@@ -21,7 +21,7 @@ const APP_NAME: &str = "niri_tracker";
             PRIMARY KEY (app_id, activity_date)
             )",
         (), 
-    ).unwrap();
+    ).unwrap_or(0);
 
     let (tx, rx) = mpsc::channel::<WindowCommand>(100);
     let db = DB::new(rx);
