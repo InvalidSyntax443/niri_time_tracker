@@ -3,7 +3,8 @@ use directories::ProjectDirs;
 use niri_ipc::{Event, Response, socket::Socket};
 use rusqlite::Connection;
 use tokio::sync::mpsc;
-use crate::{async_logic::{DB, WindowCommand}, app::App};
+use crate::{app_actor::{AppActor, WindowCommand}, app_actor::App};
+
 
 const APP_NAME: &str = "niri_tracker";
 
@@ -24,9 +25,9 @@ const APP_NAME: &str = "niri_tracker";
     ).unwrap_or(0);
 
     let (tx, rx) = mpsc::channel::<WindowCommand>(100);
-    let db = DB::new(rx);
+    let app_actor = AppActor::new(rx);
 
-    tokio::spawn(db.run(home_directory));
+    tokio::spawn( app_actor.run(home_directory));
 
     let mut socket_event = Socket::connect()?;
     let mut socket_window = Socket::connect()?;
@@ -73,5 +74,4 @@ fn get_storage_dir() -> Result<PathBuf, Error>{
     }
 }
 
-mod async_logic;
-mod app;
+mod app_actor;

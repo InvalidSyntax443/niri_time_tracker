@@ -1,20 +1,20 @@
 use std::{path::PathBuf, time::{SystemTime, UNIX_EPOCH}};
 use rusqlite::Connection;
 use tokio::sync::mpsc;
-use crate::app::App;
+use niri_ipc::Window;
 
 pub enum WindowCommand{
     Open(App),
     Close,
 }
 
-pub struct DB{
+pub struct AppActor{
     receiver: mpsc::Receiver<WindowCommand>,
     current_window: Option<App>,
     previous_window: Option<App>,
 }
 
-impl DB {
+impl AppActor {
     pub fn new(rx: mpsc::Receiver<WindowCommand>) -> Self{
         Self { receiver: rx, current_window: None, previous_window: None }
     }
@@ -56,5 +56,20 @@ impl DB {
                 (time as i32, &previous.app_id))?;
         }
         Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct App{
+    pub app_id: String,
+    pub focus_time: u64,
+}
+
+impl App {
+    pub fn new(window: Window) -> Self{
+        let app_id = window.app_id.unwrap_or(String::from("Unknown"));
+        let now_time = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time has gone into reverse.").as_secs();
+
+        Self { app_id, focus_time: now_time }
     }
 }
