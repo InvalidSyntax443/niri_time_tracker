@@ -3,33 +3,25 @@ use rusqlite::Connection;
 use tokio::sync::mpsc;
 use niri_ipc::Window;
 
-pub enum WindowCommand{
-    Open(App),
-    Close,
-}
-
 pub struct AppActor{
-    receiver: mpsc::Receiver<WindowCommand>,
+    receiver: mpsc::Receiver<Option<App>>,
     current_window: Option<App>,
     previous_window: Option<App>,
 }
 
 impl AppActor {
-    pub fn new(rx: mpsc::Receiver<WindowCommand>) -> Self{
+    pub fn new(rx: mpsc::Receiver<Option<App>>) -> Self{
         Self { receiver: rx, current_window: None, previous_window: None }
     }
 
     pub async fn run(mut self, home_directory: PathBuf){
-        while let Some(cmd) = self.receiver.recv().await {
+        while let Some(window) = self.receiver.recv().await {
             self.previous_window = self.current_window;
 
-            match cmd{
-                WindowCommand::Open(app) => {
-                    self.current_window = Some(app);
-                },
-                WindowCommand::Close => {
-                    self.current_window = None;
-                }
+            if let Some(app) = window{
+                self.current_window = Some(app);
+            } else {
+                self.current_window = None;
             }
 
             if let Err(e) = self.write_bd(&home_directory).await{
@@ -66,10 +58,14 @@ pub struct App{
 }
 
 impl App {
-    pub fn new(window: Window) -> Self{
-        let app_id = window.app_id.unwrap_or(String::from("Unknown"));
+    pub fn new(window: Window) -> Option<Self>{
         let now_time = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time has gone into reverse.").as_secs();
 
-        Self { app_id, focus_time: now_time }
+        if let Some(app_id) = window.app_id{
+            return Some(Self { app_id, focus_time: now_time });
+        }
+
+        eprintln!("Could not recognize the app id");
+        None
     }
 }

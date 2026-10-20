@@ -3,7 +3,7 @@ use directories::ProjectDirs;
 use niri_ipc::{Event, Response, socket::Socket};
 use rusqlite::Connection;
 use tokio::sync::mpsc;
-use crate::{app_actor::{AppActor, WindowCommand}, app_actor::App};
+use crate::{app_actor::AppActor, app_actor::App};
 
 
 const APP_NAME: &str = "niri_tracker";
@@ -24,7 +24,7 @@ const APP_NAME: &str = "niri_tracker";
         (), 
     ).unwrap_or(0);
 
-    let (tx, rx) = mpsc::channel::<WindowCommand>(100);
+    let (tx, rx) = mpsc::channel::<Option<App>>(100);
     let app_actor = AppActor::new(rx);
 
     tokio::spawn( app_actor.run(home_directory));
@@ -43,18 +43,18 @@ const APP_NAME: &str = "niri_tracker";
                      let Response::FocusedWindow(window) = response else { panic!("unexpected response: expected FocusedWindow") };
                      if let Some(window) = window{
                         let app = App::new(window);
-                        if tx.send(WindowCommand::Open(app)).await.is_err(){
+                        if tx.send(app).await.is_err(){
                             eprintln!("Sender error")
                         };
                      } else {
-                        if tx.send(WindowCommand::Close).await.is_err(){
+                        if tx.send(None).await.is_err(){
                             eprintln!("Sender error")
                         };
                      }
                  }, 
                  Event::WindowOpenedOrChanged { window } => {
                     let app = App::new(window);
-                    if tx.send(WindowCommand::Open(app)).await.is_err(){
+                    if tx.send(app).await.is_err(){
                         eprintln!("Sender error")
                     };
                  },
