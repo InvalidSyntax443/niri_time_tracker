@@ -15,14 +15,9 @@ impl AppActor {
     }
 
     pub async fn run(mut self, home_directory: PathBuf){
-        while let Some(window) = self.receiver.recv().await {
+        while let Some(app) = self.receiver.recv().await {
             self.previous_window = self.current_window;
-
-            if let Some(app) = window{
-                self.current_window = Some(app);
-            } else {
-                self.current_window = None;
-            }
+            self.current_window = app;
 
             if let Err(e) = self.write_bd(&home_directory).await{
                 eprintln!("{}", e);
@@ -65,7 +60,7 @@ impl App {
             return Some(Self { app_id, focus_time: now_time });
         }
 
-        eprintln!("Could not recognize the app id");
+        eprintln!("Could not recognize the app id: pid - {:?}", window.pid);
         None
     }
 }
