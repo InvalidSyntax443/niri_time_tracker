@@ -1,18 +1,14 @@
-use std::{fs, io::Error, io::ErrorKind, path::PathBuf};
-use directories::ProjectDirs;
+use std::io::Error;
 use niri_ipc::{Event, Response, socket::Socket};
 use rusqlite::Connection;
 use tokio::sync::mpsc;
-use crate::{app_actor::AppActor, app_actor::App};
-
-
-const APP_NAME: &str = "niri_tracker";
+use crate::{app_actor::{App, AppActor}, cli::get_storage_dir};
 
 
  #[tokio::main]
  async fn main() -> Result<(), Error>{
     let home_directory = get_storage_dir()?;
-    let conn = Connection::open(home_directory.join("AppsBD.db")).expect("Failed to create the database");
+    let conn = Connection::open(&home_directory).expect("Failed to create the database");
 
     conn.execute(
         "CREATE TABLE Apps (
@@ -64,14 +60,5 @@ const APP_NAME: &str = "niri_tracker";
      }
  }
 
-fn get_storage_dir() -> Result<PathBuf, Error>{
-    if let Some(home_dir) = ProjectDirs::from("", "", APP_NAME){
-        let data_dir = home_dir.data_dir().to_path_buf();
-        fs::create_dir_all(&data_dir)?;
-        Ok(data_dir)
-    } else {
-        return Err(Error::new(ErrorKind::NotFound, "Could not determine the user's home directory"));
-    }
-}
-
 mod app_actor;
+mod cli;

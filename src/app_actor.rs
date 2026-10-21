@@ -27,7 +27,7 @@ impl AppActor {
 
     async fn write_bd(&self, home_directory: &PathBuf) -> Result<(), rusqlite::Error>{
         let now_time = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time has gone into reverse.").as_secs();
-        let conn = Connection::open(home_directory.join("AppsBD.db"))?;
+        let conn = Connection::open(home_directory)?;
 
 
         if let Some(ref current) = self.current_window{
@@ -42,6 +42,7 @@ impl AppActor {
                 "UPDATE Apps SET activity_time = activity_time + ?1 WHERE app_id = ?2",
                 (time as i32, &previous.app_id))?;
         }
+
         Ok(())
     }
 }
@@ -60,7 +61,7 @@ impl App {
             return Some(Self { app_id, focus_time: now_time });
         }
 
-        eprintln!("Could not recognize the app id: pid - {:?}", window.pid);
+        eprintln!("Could not recognize the app id, pid - {:?}", window.pid);
         None
     }
 }
