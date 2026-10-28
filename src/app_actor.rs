@@ -32,7 +32,7 @@ impl AppActor {
 
         if let Some(ref current) = self.current_window{
             conn.execute(
-                "INSERT OR IGNORE INTO Apps (app_id, activity_time) VALUES (?1, ?2);",
+                "INSERT OR IGNORE INTO Apps (app_id, activity_time, activity_date) VALUES (?1, ?2, date('now', 'localtime'));",
                 (&current.app_id, 0))?;
         }
 
