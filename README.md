@@ -1,4 +1,4 @@
-A small utility for tracking your activity in programs using niri.
+A small utility for tracking your activity in niri.
 
 ## Installation
 
