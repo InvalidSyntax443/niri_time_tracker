@@ -39,7 +39,6 @@
           rust-analyzer
 
           pkg-config
-          fontconfig
         ];
 
         packages = with pkgs; [

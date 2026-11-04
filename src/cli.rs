@@ -19,7 +19,7 @@ pub struct Cli {
 
 pub fn get_storage_dir() -> Result<PathBuf, Error> {
     let user_path = Cli::parse().path;
-    let file_name = Cli::parse().file_name.unwrap_or("AppsBD.db".to_string());
+    let file_name = Cli::parse().file_name.unwrap_or("AppsBD.db".to_owned());
 
     match user_path {
         Some(path) => {
@@ -39,10 +39,10 @@ pub fn get_storage_dir() -> Result<PathBuf, Error> {
                 fs::create_dir_all(&data_dir)?;
                 Ok(data_dir.join(file_name))
             } else {
-                return Err(Error::new(
+                Err(Error::new(
                     ErrorKind::NotFound,
                     "Could not determine the user's home directory",
-                ));
+                ))
             }
         }
     }

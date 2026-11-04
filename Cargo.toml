@@ -2,9 +2,10 @@
 name = "time_tracker_niri"
 version = "0.1.0"
 edition = "2024"
+description = "A small utility for tracking your activity in programs using niri"
 
 [dependencies]
-niri-ipc = "26.4.0" 
+niri-ipc = "26.4.0"
 rusqlite = { version = "0.40", features = ["bundled"] }
 tokio = { version = "1.53.3", features = ["full"] }
 directories = "6.0.0"
