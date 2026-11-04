@@ -16,16 +16,18 @@ The compiled file is located in target/release/
 
 ### NixOS
 
+Add to flake.nix
+
 ```nix
 niri_tracker.url = "github:InvalidSyntax443/niri_time_tracker";
 ```
+
+Then into their own packages
 
 ```nix
 environment.systemPackages = [ inputs.niri_tracker.packages.x86_64-linux.default ];
 ```
 
-or
-
-'''nix
+```nix
 home.packages = [ inputs.niri_tracker.packages.x86_64-linux.default ];
-'''
+```
